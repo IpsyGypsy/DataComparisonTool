@@ -3,8 +3,8 @@
 Implementation:-
 
 1.	Run the script by calling it as follows:
-./dataForValidation.sh <environment><list of comma seperated IDs without space in between><attributes to be fetched for a table in HBase, * for all>
-E.g. ./dataForValidation.sh dev "<ID1>,<ID2>" "*"
+./dataForValidation.sh <environment> <list of comma seperated IDs without space in between> <attributes to be fetched for a table in HBase, * for all>
+E.g. ./dataForValidation.sh dev "ID1,ID2,.." "*"
 2.	Determine whether environment is DEV or QA. Based on that Solr search will be done.
 3.	Call function “id” to get the consolidated list of IDs with quotation marks and separated by comma. These IDs will be used while searching in Solr and HBase via Hive.
 4.	Curl command is used to generate result from Solr and output is stored in dataForValidation.csv file.
