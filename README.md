@@ -14,4 +14,4 @@ E.g. ./dataForValidation.sh dev "3bcce709-2262-1034-9781-ac162d9d7c07,16f13f9b-4
 8.	Data is inserted into this table from initial Hive table which houses data from HBase table. While doing so, the data is filtered for optimization.
 9.	Now the staging Hive table is queried, ordered by GID.
 10.	The output is stored in dataForValidation.csv file. 
-11.	The process is repeated for Account table.
+11.	The process is repeated for other table.
