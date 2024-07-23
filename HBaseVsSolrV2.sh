@@ -19,23 +19,28 @@ echo "Attributes to be checked: ${array[2]} ${array[3]}" # Print the values of t
 attributeList="*" # Initialize the attributeList variable
 
 solrValidation() {
-    idDivide=0 # Reset the idDivide variable
+    # idDivide=0 # Reset the idDivide variable
     echo "Executing solrValidation function"
 
-    IFS=',' # Set the comma as the delimiter
-    read -ra IDArray <<< "$4" # Read the fourth argument into an array, using the comma as the delimiter
-    for i in "${IDArray[@]}"; do # Iterate over each element in the array
-        restCall=$1$2"/select?df="$3"&fq="$i"&indent=on&q=*:*&rows="$5"&sort="$3"%20asc&wt=csv" # Form the query for Solr search
-        if [ $idDivide = 0 ]; then # Check if idDivide is 0
-            idDivide=$(expr $idDivide + 1) # Increment idDivide by 1
-            curl $restCall  | sed 's/\\,/;/g' | tee -a solr.csv >> dataForValidation.csv # Replace '\,' characters with ';' and write to csv
-        else
-            curl $restCall  | sed 's/\\,/;/g' | sed '1d' | tee -a solr.csv >> dataForValidation.csv # Replace '\,' characters with ';' and write to csv
-        fi
-    done
-    unset IFS
-    IFS='`'
-    hive -S -e 'drop table if exists s;CREATE TABLE IF NOT EXISTS s(key string,fnm string,lnm string,dob string,funm string,ssn string,grp string,pol string,gid string,ad1 string,ad2 string,ad3 string,adloc string,adty string,ccd string,cty string,dod string,eid string,emp string,epi string,gcd string,mnm string,pcd string,perid string,pid string,ppi string,st string,sty string,suff string,ph string) ROW FORMAT DELIMITED FIELDS TERMINATED BY "," STORED AS ORC TBLPROPERTIES("compress.mode"="SNAPPY");LOAD DATA LOCAL INPATH ' dataForValidation.csv' INTO TABLE s'
+    # IFS=',' # Set the comma as the delimiter
+    # read -ra IDArray <<< "$4" # Read the fourth argument into an array, using the comma as the delimiter
+    # for i in "${IDArray[@]}"; do # Iterate over each element in the array
+    #     restCall=$1$2"/select?df="$3"&fq="$i"&indent=on&q=*:*&rows="$5"&sort="$3"%20asc&wt=csv" # Form the query for Solr search
+    #     if [ $idDivide = 0 ]; then # Check if idDivide is 0
+    #         idDivide=$(expr $idDivide + 1) # Increment idDivide by 1
+    #         curl $restCall  | sed 's/\\,/;/g' | tee -a solr.csv >> dataForValidation.csv # Replace '\,' characters with ';' and write to csv
+    #     else
+    #         curl $restCall  | sed 's/\\,/;/g' | sed '1d' | tee -a solr.csv >> dataForValidation.csv # Replace '\,' characters with ';' and write to csv
+    #     fi
+    # done
+    # unset IFS
+    # IFS='`'
+
+    
+    # Drop the table if it exists and create an external table in Hive with HBase storage handler
+    hive -S -e 'drop table if exists tableASolr;CREATE EXTERNAL TABLE IF NOT EXISTS tableASolr(key string,fnm string,lnm string,dob string,funm string,ssn string,grp string,pol string,gid string,ad1 string,ad2 string,ad3 string,adloc string,adty string,ccd string,cty string,dod string,eid string,emp string,epi string,gcd string,mnm string,pcd string,perid string,pid string,ppi string,st string,sty string,suff string,ph string) STORED BY "com.lucidworks.hadoop.hive.LWStorageHandler" LOCATION "/tmp/solr" TBLPROPERTIES("solr.server.url" = "'$1'", "solr.collection" = "tableA","solr.query" = "*:*");'
+
+    hive -S -e 'drop table if exists s;CREATE TABLE IF NOT EXISTS s(key string,fnm string,lnm string,dob string,funm string,ssn string,grp string,pol string,gid string,ad1 string,ad2 string,ad3 string,adloc string,adty string,ccd string,cty string,dod string,eid string,emp string,epi string,gcd string,mnm string,pcd string,perid string,pid string,ppi string,st string,sty string,suff string,ph string) ROW FORMAT DELIMITED FIELDS TERMINATED BY "," STORED AS ORC TBLPROPERTIES("compress.mode"="SNAPPY");insert into table s select * from tableASolr where gid in ('$id');'
 }
 
 id() {
