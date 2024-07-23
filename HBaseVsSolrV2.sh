@@ -80,14 +80,17 @@ attribute() {
 }
 
 compare() {
-    hbase_val=$(hive -S -e 'select md5(concat(*)) as md5 from p') 
-    solr_val=$(hive -S -e 'select md5(concat(*)) as md5 from sqoopTable')
+    # hbase_val=$(hive -S -e 'select md5(concat(*)) as md5 from p') 
+    # solr_val=$(hive -S -e 'select md5(concat(*)) as md5 from s')
 
-    if [ "$hbase_val" = "$solr_val" ]; then
-        echo "NO DIFFERENCE"
-    else
-        echo "DIFFERENCE FOUND! KINDLY CHECK!"
-    fi
+    # if [ "$hbase_val" = "$solr_val" ]; then
+    #     echo "NO DIFFERENCE"
+    # else
+    #     echo "DIFFERENCE FOUND! KINDLY CHECK!"
+    # fi
+
+    hive -S -e 'select * from (select md5(concat(p.*)) as pHash,p.*, md5(concat(s.*)) as sTbl,s.* as sHash from p join s on ) 
+    where pHash <> sHash;'
 }
 
 if [ "${array[0]}" = "dev" ]; then # Check if the value of the first element in the array is "dev"
