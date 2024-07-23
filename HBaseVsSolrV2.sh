@@ -89,8 +89,7 @@ compare() {
     #     echo "DIFFERENCE FOUND! KINDLY CHECK!"
     # fi
 
-    hive -S -e 'select * from (select md5(concat(p.*)) as pHash,p.*, md5(concat(s.*)) as sTbl,s.* as sHash from p join s on ) 
-    where pHash <> sHash;'
+    hive -S -e 'set hive.auto.convert.join=true; set hive.execution.engine=tez; set hive.cbo.enable=true; set hive.exec.parallel=true; select * from (select md5(concat(p.*)) as pHash,p.*, md5(concat(s.*)) as sTbl,s.* as sHash from p join s on p.key=s.key and p.fnm=s.fnm and p.id=s.id and p.lnm=s.lnm and p.ssn=s.ssn and p.dob=s.dob and p.grp=s.grp) where pHash <> sHash;' >> dataForValidation.csv
 }
 
 if [ "${array[0]}" = "dev" ]; then # Check if the value of the first element in the array is "dev"
@@ -131,7 +130,7 @@ hive -S -e "$query" | sed 's/,/;/g' | sed 's/[\t]/,/g' | sed 's/NULL//g' | tee -
 # Call the compare function with "TableA" as the argument
 compare "TableA"
 # Remove the dataForValidation.csv file
-rm dataForValidation.csv
+# rm dataForValidation.csv
 	
 # Go back to the parent directory
 cd ..
