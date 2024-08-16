@@ -89,7 +89,7 @@ compare() {
     #     echo "DIFFERENCE FOUND! KINDLY CHECK!"
     # fi
 
-    hive -S -e 'set hive.auto.convert.join=true; set hive.execution.engine=tez; set hive.cbo.enable=true; set hive.exec.parallel=true; select * from (select md5(concat(p.*)) as pHash,p.*, md5(concat(s.*)) as sTbl,s.* as sHash from p join s on p.key=s.key and p.fnm=s.fnm and p.id=s.id and p.lnm=s.lnm and p.ssn=s.ssn and p.dob=s.dob and p.grp=s.grp) where pHash <> sHash;' >> dataForValidation.csv
+    hive -S -e 'set hive.auto.convert.join=true; set hive.execution.engine=tez; set hive.cbo.enable=true; set hive.exec.parallel=true; select * from (select md5(concat(p.*)) as pHash,p.id, md5(concat(s.*)) as sHash from p join s on p.id=s.id) h where h.pHash <> h.sHash;' >> dataForValidation.csv
 }
 
 if [ "${array[0]}" = "dev" ]; then # Check if the value of the first element in the array is "dev"
